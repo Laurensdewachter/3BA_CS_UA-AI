@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem: SearchProblem):
     """
@@ -111,6 +113,7 @@ def breadthFirstSearch(problem: SearchProblem):
             if successor[0] not in visited:
                 fringe.push((successor[0], path + [successor[1]]))
 
+
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
 
@@ -136,6 +139,7 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
