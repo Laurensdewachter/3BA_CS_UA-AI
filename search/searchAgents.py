@@ -544,13 +544,32 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     if food_grid.count() == 0:
         return 0
 
+    # If only 1 food left, return distance to that food
+    if food_grid.count() == 1:
+        return mazeDistance(food_grid.asList()[0], position, problem.startingGameState)
+
     food_list = food_grid.asList()
 
-    distances = []
-    for food in food_list:
-            distances.append(util.manhattanDistance(position, food))
+    # If more than 2 food left, calculate the position of the 2 foods that are the furthest apart from each other
+    max_distance = float("-inf")
+    pos1, pos2 = None, None
+    for i in range(len(food_list)):
+        for j in range(i + 1, len(food_list)):
+            distance = mazeDistance(
+                food_list[i], food_list[j], problem.startingGameState
+            )
+            if distance > max_distance:
+                max_distance = distance
+                pos1, pos2 = food_list[i], food_list[j]
 
-    return max(distances)
+    # Calculate the distance the closest food and pacman
+    closer_food = min(
+        mazeDistance(pos1, position, problem.startingGameState),
+        mazeDistance(pos2, position, problem.startingGameState),
+    )
+
+    # Return the max distance between the 2 foods and the distance to the closest food
+    return max_distance + closer_food
 
 
 class ClosestDotSearchAgent(SearchAgent):
