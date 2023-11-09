@@ -421,17 +421,12 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = problem.corners  # These are the corner coordinates
-
     if len(state[1]) == 4:
         return 0
 
-    distances = []
-    for corner in corners:
-        if corner not in state[1]:
-            distances.append(util.manhattanDistance(state[0], corner))
+    unvisited_corners = set(problem.corners) - set(state[1])
 
-    return max(distances)
+    return max(util.manhattanDistance(state[0], corner) for corner in unvisited_corners)
 
 
 class AStarCornersAgent(SearchAgent):
