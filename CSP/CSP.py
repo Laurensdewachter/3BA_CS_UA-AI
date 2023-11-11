@@ -132,15 +132,26 @@ class CSP(ABC):
         Use `CSP::forwardChecking` and you should no longer need to check if an assignment is valid.
         :return: a complete and valid assignment if one exists, None otherwise.
         """
-        # TODO: Implement CSP::_solveForwardChecking (problem 2)
-        pass
+        if self.isComplete(assignment):
+            return assignment
+        var = self.selectVariable(assignment, domains)
+        for value in self.orderDomain(assignment, domains, var):
+            if self.isValid(assignment):
+                assignment[var] = value
+                new_domains = self.forwardChecking(assignment, domains, var)
+                if new_domains is not None:
+                    result = self._solveForwardChecking(assignment, new_domains)
+                    if result is not None:
+                        return result
+                del assignment[var]
+        return None
 
     def forwardChecking(
         self,
         assignment: Dict[Variable, Value],
         domains: Dict[Variable, Set[Value]],
         variable: Variable,
-    ) -> Dict[Variable, Set[Value]]:
+    ) -> Dict[Variable, Set[Value]] or None:
         """Implement the forward checking algorithm from the theory lectures.
 
         :param domains: current domains.
@@ -148,8 +159,18 @@ class CSP(ABC):
         :param variable: The variable that was just assigned (only need to check changes).
         :return: the new domains after enforcing all constraints.
         """
-        # TODO: Implement CSP::forwardChecking (problem 2)
-        pass
+        new_domains = copy.copy(domains)
+        for neighbor in self.neighbors(variable):
+            if neighbor in assignment:
+                continue
+            new_set = set()
+            for value in new_domains[neighbor]:
+                if self.isValidPairwise(variable, assignment[variable], neighbor, value):
+                    new_set.add(value)
+            new_domains[neighbor] = new_set
+            if len(new_set) == 0:
+                return None
+        return new_domains
 
     def selectVariable(
         self, assignment: Dict[Variable, Value], domains: Dict[Variable, Set[Value]]
