@@ -199,18 +199,17 @@ class CSP(ABC):
         if not self.LCV:
             return list(domains[var])
 
-        # TODO: Rewrite to make this more efficient
-        def count_prunes(value):
-            count = 0
-            for neighbor in self.neighbors(var):
-                if neighbor in assignment:
+        ruled_out = {}
+        for val in domains[var]:
+            ruled_out[val] = 0
+            for neighbor in self.remainingVariables(assignment):
+                if neighbor == var:
                     continue
                 for neighbor_value in domains[neighbor]:
-                    if not self.isValidPairwise(var, value, neighbor, neighbor_value):
-                        count += 1
-            return count
-
-        return sorted(domains[var], key=lambda value: count_prunes(value))
+                    if not self.isValidPairwise(var, val, neighbor, neighbor_value):
+                        ruled_out[val] += 1
+        temp = sorted(ruled_out, key=ruled_out.get)
+        return temp
 
     def solveAC3(
         self, initialAssignment: Dict[Variable, Value] = dict()
@@ -247,7 +246,6 @@ class CSP(ABC):
             del assignment[var]
             domains = original_domain
 
-
         return None
 
     def remove_inconsistent_values(self, domains, tail, head):
@@ -275,7 +273,11 @@ class CSP(ABC):
         :return: the new domains ensuring arc consistency.
         """
 
-        queue = [(variable, neighbor) for neighbor in self.neighbors(variable) if neighbor != variable]
+        queue = [
+            (variable, neighbor)
+            for neighbor in self.neighbors(variable)
+            if neighbor != variable
+        ]
         while queue:
             (head, tail) = queue.pop(0)
             if self.remove_inconsistent_values(domains, tail, head):

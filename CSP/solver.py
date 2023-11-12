@@ -42,7 +42,7 @@ def solve(csp, method: Method, initialAssignment=dict()):
 
 @app.command()
 def sudoku(path: str, method: Method = Method.bf, MRV: bool = True, LCV: bool = True):
-    """ Solve Sudoku as a CSP. """
+    """Solve Sudoku as a CSP."""
     if method == Method.bf:
         MRV = False
         LCV = False
@@ -53,7 +53,7 @@ def sudoku(path: str, method: Method = Method.bf, MRV: bool = True, LCV: bool = 
 
 @app.command()
 def queens(n: int = 5, method: Method = Method.bf, MRV: bool = True, LCV: bool = True):
-    """ Solve the N Queens problem as a CSP. """
+    """Solve the N Queens problem as a CSP."""
     if method == Method.bf:
         MRV = False
         LCV = False

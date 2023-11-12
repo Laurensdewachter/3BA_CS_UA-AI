@@ -10,29 +10,31 @@ class NQueens(CSP):
         self._variables = set(Queen(col, self.n) for col in range(self.n))
 
     @property
-    def variables(self) -> Set['Queen']:
-        """ Return the set of variables in this CSP. """
+    def variables(self) -> Set["Queen"]:
+        """Return the set of variables in this CSP."""
         return self._variables
 
-    def neighbors(self, var: 'Queen') -> Set['Queen']:
-        """ Return all variables related to var by some constraint. """
+    def neighbors(self, var: "Queen") -> Set["Queen"]:
+        """Return all variables related to var by some constraint."""
         return self.variables - {var}
 
-    def isValidPairwise(self, var1: 'Queen', val1: Value, var2: 'Queen', val2: Value) -> bool:
-        """ Return whether this pairwise assignment is valid with the constraints of the csp. """
+    def isValidPairwise(
+        self, var1: "Queen", val1: Value, var2: "Queen", val2: Value
+    ) -> bool:
+        """Return whether this pairwise assignment is valid with the constraints of the csp."""
         col1, row1 = var1.col, val1
         col2, row2 = var2.col, val2
 
-        if row1 == row2:                                # same row
+        if row1 == row2:  # same row
             return False
 
-        if abs(row1 - row2) == abs(col1 - col2):        # diagonal
+        if abs(row1 - row2) == abs(col1 - col2):  # diagonal
             return False
 
         return True
 
-    def assignmentToStr(self, assignment: Dict['Queen', Value]) -> str:
-        """ Formats the assignment of variables for this CSP into a string. """
+    def assignmentToStr(self, assignment: Dict["Queen", Value]) -> str:
+        """Formats the assignment of variables for this CSP into a string."""
         if len(assignment) > 80:
             return super().assignmentToStr(assignment)
         border = "+" + "-" * (self.n) + "+"
@@ -59,7 +61,11 @@ class Queen(Variable):
         return f"Q{self.col}"
 
     def __eq__(self, other):
-        return isinstance(other, Queen) and self.col == other.col and self.boardsize == other.boardsize
+        return (
+            isinstance(other, Queen)
+            and self.col == other.col
+            and self.boardsize == other.boardsize
+        )
 
     def __hash__(self):
         return hash((self.col, self.boardsize))
