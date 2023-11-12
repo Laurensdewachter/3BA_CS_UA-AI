@@ -165,7 +165,9 @@ class CSP(ABC):
                 continue
             new_set = set()
             for value in new_domains[neighbor]:
-                if self.isValidPairwise(variable, assignment[variable], neighbor, value):
+                if self.isValidPairwise(
+                    variable, assignment[variable], neighbor, value
+                ):
                     new_set.add(value)
             new_domains[neighbor] = new_set
             if len(new_set) == 0:
@@ -179,7 +181,13 @@ class CSP(ABC):
         if not self.MRV:
             return random.choice(list(self.remainingVariables(assignment)))
 
-        # TODO: Implement CSP::selectVariable (problem 2)
+        min_var = None
+        min_len = float("inf")
+        for var in self.remainingVariables(assignment):
+            if len(domains[var]) < min_len:
+                min_var = var
+                min_len = len(domains[var])
+        return min_var
 
     def orderDomain(
         self,
@@ -191,7 +199,17 @@ class CSP(ABC):
         if not self.LCV:
             return list(domains[var])
 
-        # TODO: Implement CSP::orderDomain (problem 2)
+        def count_prunes(value):
+            count = 0
+            for neighbor in self.neighbors(var):
+                if neighbor in assignment:
+                    continue
+                for value in domains[neighbor]:
+                    if not self.isValidPairwise(var, value, neighbor, value):
+                        count += 1
+            return count
+
+        return sorted(domains[var], key=lambda value: count_prunes(value))
 
     def solveAC3(
         self, initialAssignment: Dict[Variable, Value] = dict()
