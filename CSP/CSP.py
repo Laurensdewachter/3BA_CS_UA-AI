@@ -199,13 +199,14 @@ class CSP(ABC):
         if not self.LCV:
             return list(domains[var])
 
+        # TODO: Rewrite to make this more efficient
         def count_prunes(value):
             count = 0
             for neighbor in self.neighbors(var):
                 if neighbor in assignment:
                     continue
-                for value in domains[neighbor]:
-                    if not self.isValidPairwise(var, value, neighbor, value):
+                for neighbor_value in domains[neighbor]:
+                    if not self.isValidPairwise(var, value, neighbor, neighbor_value):
                         count += 1
             return count
 
@@ -230,15 +231,42 @@ class CSP(ABC):
         Use `CSP::ac3`.
         :return: a complete and valid assignment if one exists, None otherwise.
         """
-        # TODO: Implement CSP::_solveAC3 (problem 3)
-        pass
+        if self.isComplete(assignment):
+            return assignment
+        var = self.selectVariable(assignment, domains)
+        original_domain = copy.deepcopy(domains)
+
+        for value in self.orderDomain(assignment, domains, var):
+            assignment[var] = value
+            domains[var] = {value}
+            new_domains = self.ac3(assignment, domains, var)
+            if new_domains is not None:
+                result = self._solveAC3(assignment, new_domains)
+                if result is not None:
+                    return result
+            del assignment[var]
+            domains = original_domain
+
+
+        return None
+
+    def remove_inconsistent_values(self, domains, tail, head):
+        removed = False
+        to_remove = set()
+        for x in domains[tail]:
+            if not any(self.isValidPairwise(tail, x, head, y) for y in domains[head]):
+                to_remove.add(x)
+                removed = True
+        for x in to_remove:
+            domains[tail].remove(x)
+        return removed
 
     def ac3(
         self,
         assignment: Dict[Variable, Value],
         domains: Dict[Variable, Set[Value]],
         variable: Variable,
-    ) -> Dict[Variable, Set[Value]]:
+    ) -> Dict[Variable, Set[Value]] or None:
         """Implement the AC3 algorithm from the theory lectures.
 
         :param domains: current domains.
@@ -246,8 +274,16 @@ class CSP(ABC):
         :param variable: The variable that was just assigned (only need to check changes).
         :return: the new domains ensuring arc consistency.
         """
-        # TODO: Implement CSP::ac3 (problem 3)
-        pass
+
+        queue = [(variable, neighbor) for neighbor in self.neighbors(variable) if neighbor != variable]
+        while queue:
+            (head, tail) = queue.pop(0)
+            if self.remove_inconsistent_values(domains, tail, head):
+                if len(domains[tail]) == 0:
+                    return None
+                for neighbor in self.neighbors(tail):
+                    queue.append((neighbor, tail))
+        return domains
 
 
 def domainsFromAssignment(
