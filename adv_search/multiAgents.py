@@ -90,14 +90,14 @@ class ReflexAgent(Agent):
             close_ghost_dist = -close_ghost_dist * 3
 
         if action == "Stop":
-            return 1/close_food_dist
+            return 1 / close_food_dist
 
         return (
             (
                 (15 / (close_food_dist + 1))
                 + (80 / (successorGameState.getNumFood() + 1))
             )
-            + close_ghost_dist/8
+            + close_ghost_dist / 8
             + successorGameState.getScore()
             - currentGameState.getScore()
         )
@@ -163,8 +163,36 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        def minmax(gameState: GameState, agent_index=0, depth=0):
+            if gameState.isWin() or gameState.isLose() or self.depth == depth:
+                return [self.evaluationFunction(gameState)]
+
+            if agent_index == gameState.getNumAgents() - 1:
+                next_agent_index = self.index
+                depth += 1
+            else:
+                next_agent_index = agent_index + 1
+
+            best_action = None
+            if agent_index == 0:
+                v = float("-inf")
+                for action in gameState.getLegalActions(agent_index):
+                    new_minmax = minmax(gameState.generateSuccessor(agent_index, action), next_agent_index, depth)[0]
+                    if new_minmax > v:
+                        v = new_minmax
+                        best_action = action
+                return v, best_action
+            else:
+                v = float("inf")
+                for action in gameState.getLegalActions(agent_index):
+                    new_minmax = minmax(gameState.generateSuccessor(agent_index, action), next_agent_index, depth)[0]
+                    if new_minmax < v:
+                        v = new_minmax
+                        best_action = action
+                return v, best_action
+
+        return minmax(gameState)[1]
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
